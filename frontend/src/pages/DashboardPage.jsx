@@ -5,30 +5,14 @@ import { FiActivity, FiTrendingUp, FiUsers, FiZap } from 'react-icons/fi'
 import { authApi } from '../services/authApi'
 import { useAuth } from '../context/AuthContext'
 
-const pieData = [
-  { name: 'Invest', value: 74 },
-  { name: 'Pass', value: 54 },
-]
-
-const trendData = [
-  { month: 'Jan', score: 72 },
-  { month: 'Feb', score: 76 },
-  { month: 'Mar', score: 79 },
-  { month: 'Apr', score: 81 },
-  { month: 'May', score: 84 },
-]
-
-const sectorData = [
-  { sector: 'AI', count: 31 },
-  { sector: 'Energy', count: 18 },
-  { sector: 'Fintech', count: 24 },
-  { sector: 'Healthcare', count: 20 },
-]
-
 export default function DashboardPage() {
   const { user } = useAuth()
   const [reports, setReports] = useState([])
   const [stats, setStats] = useState({ totalReports: 0, invested: 0, passed: 0, confidence: 0 })
+  
+  const [pieData, setPieData] = useState([{ name: 'No Data', value: 1 }])
+  const [trendData, setTrendData] = useState([])
+  const [sectorData, setSectorData] = useState([])
 
   useEffect(() => {
     const load = async () => {
@@ -36,12 +20,56 @@ export default function DashboardPage() {
         const response = await authApi.getReports()
         const items = response.data.reports || []
         setReports(items)
-        setStats({
-          totalReports: items.length,
-          invested: items.filter((report) => report.recommendation === 'INVEST').length,
-          passed: items.filter((report) => report.recommendation === 'PASS').length,
-          confidence: items.length ? Math.round(items.reduce((sum, report) => sum + (report.confidenceScore || 0), 0) / items.length) : 0,
-        })
+          const invested = items.filter((report) => report.recommendation === 'INVEST').length
+          const passed = items.filter((report) => report.recommendation === 'PASS').length
+          
+          setStats({
+            totalReports: items.length,
+            invested,
+            passed,
+            confidence: items.length ? Math.round(items.reduce((sum, report) => sum + (report.confidenceScore || 0), 0) / items.length) : 0,
+          })
+
+          // Calculate Recommendation Mix (Pie)
+          if (items.length === 0) {
+            setPieData([{ name: 'No Data', value: 1 }])
+          } else {
+            setPieData([
+              { name: 'Invest', value: invested },
+              { name: 'Pass', value: passed }
+            ])
+          }
+
+          // Calculate Sector Distribution (Bar)
+          const sCounts = {}
+          items.forEach(r => {
+            const sector = r.aiAnalysis?.industry?.split('/')[0]?.trim() || 'Other'
+            sCounts[sector] = (sCounts[sector] || 0) + 1
+          })
+          setSectorData(Object.keys(sCounts).map(s => ({ sector: s, count: sCounts[s] })))
+
+          // Calculate Confidence Trend (Line - 6 Months)
+          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+          const tMap = {}
+          items.forEach(r => {
+            const m = monthNames[new Date(r.createdAt).getMonth()]
+            if (!tMap[m]) tMap[m] = { sum: 0, count: 0 }
+            tMap[m].sum += r.confidenceScore || 0
+            tMap[m].count += 1
+          })
+          
+          const tData = []
+          const currMonth = new Date().getMonth()
+          for (let i = 5; i >= 0; i--) {
+            let mIndex = currMonth - i
+            if (mIndex < 0) mIndex += 12
+            const mName = monthNames[mIndex]
+            tData.push({
+              month: mName,
+              score: tMap[mName] ? Math.round(tMap[mName].sum / tMap[mName].count) : 0
+            })
+          }
+          setTrendData(tData)
       } catch {
         // ignore for now
       }
@@ -81,8 +109,14 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={pieData} dataKey="value" innerRadius={70} outerRadius={100} paddingAngle={2}>
-                  <Cell fill="#22d3ee" />
-                  <Cell fill="#f43f5e" />
+                  {pieData.length === 1 && pieData[0].name === 'No Data' ? (
+                    <Cell fill="#334155" />
+                  ) : (
+                    <>
+                      <Cell fill="#22d3ee" />
+                      <Cell fill="#f43f5e" />
+                    </>
+                  )}
                 </Pie>
                 <Tooltip />
               </PieChart>
