@@ -8,7 +8,7 @@ import { protect } from '../middleware/auth.js'
 
 const router = Router()
 
-const createToken = (user) => jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' })
+const createToken = (user) => jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'supersecret_fallback_key_123', { expiresIn: '7d' })
 
 router.post(
   '/register',

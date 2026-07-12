@@ -20,7 +20,8 @@ const PORT = process.env.PORT || 4000
 app.use(helmet())
 app.use(cors({ origin: true, credentials: true }))
 app.use(morgan('dev'))
-app.use(express.json({ limit: '2mb' }))
+app.use(express.json({ limit: '50mb' }))
+app.use(express.urlencoded({ extended: true, limit: '50mb' }))
 app.use(cookieParser())
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }))
 
