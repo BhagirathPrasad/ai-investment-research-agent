@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { BarChart, Bar, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { FiActivity, FiTrendingUp, FiUsers, FiZap } from 'react-icons/fi'
-import { authApi } from '../services/authApi'
-import { useAuth } from '../context/AuthContext'
+import { FiActivity, FiTrendingUp, FiUsers, FiZap } from 'react-icons/fi'
+import { useAppContext } from '../context/AppContext'
 
 export default function DashboardPage() {
-  const { user } = useAuth()
-  const [reports, setReports] = useState([])
+  const { reports } = useAppContext()
   const [stats, setStats] = useState({ totalReports: 0, invested: 0, passed: 0, confidence: 0 })
   
   const [pieData, setPieData] = useState([{ name: 'No Data', value: 1 }])
@@ -15,68 +14,59 @@ export default function DashboardPage() {
   const [sectorData, setSectorData] = useState([])
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const response = await authApi.getReports()
-        const items = response.data.reports || []
-        setReports(items)
-          const invested = items.filter((report) => report.recommendation === 'INVEST').length
-          const passed = items.filter((report) => report.recommendation === 'PASS').length
-          
-          setStats({
-            totalReports: items.length,
-            invested,
-            passed,
-            confidence: items.length ? Math.round(items.reduce((sum, report) => sum + (report.confidenceScore || 0), 0) / items.length) : 0,
-          })
+    const items = reports || []
+    
+    const invested = items.filter((report) => report.recommendation === 'INVEST').length
+    const passed = items.filter((report) => report.recommendation === 'PASS').length
+    
+    setStats({
+      totalReports: items.length,
+      invested,
+      passed,
+      confidence: items.length ? Math.round(items.reduce((sum, report) => sum + (report.confidence || 0), 0) / items.length) : 0,
+    })
 
-          // Calculate Recommendation Mix (Pie)
-          if (items.length === 0) {
-            setPieData([{ name: 'No Data', value: 1 }])
-          } else {
-            setPieData([
-              { name: 'Invest', value: invested },
-              { name: 'Pass', value: passed }
-            ])
-          }
-
-          // Calculate Sector Distribution (Bar)
-          const sCounts = {}
-          items.forEach(r => {
-            const sector = r.aiAnalysis?.industry?.split('/')[0]?.trim() || 'Other'
-            sCounts[sector] = (sCounts[sector] || 0) + 1
-          })
-          setSectorData(Object.keys(sCounts).map(s => ({ sector: s, count: sCounts[s] })))
-
-          // Calculate Confidence Trend (Line - 6 Months)
-          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-          const tMap = {}
-          items.forEach(r => {
-            const m = monthNames[new Date(r.createdAt).getMonth()]
-            if (!tMap[m]) tMap[m] = { sum: 0, count: 0 }
-            tMap[m].sum += r.confidenceScore || 0
-            tMap[m].count += 1
-          })
-          
-          const tData = []
-          const currMonth = new Date().getMonth()
-          for (let i = 5; i >= 0; i--) {
-            let mIndex = currMonth - i
-            if (mIndex < 0) mIndex += 12
-            const mName = monthNames[mIndex]
-            tData.push({
-              month: mName,
-              score: tMap[mName] ? Math.round(tMap[mName].sum / tMap[mName].count) : 0
-            })
-          }
-          setTrendData(tData)
-      } catch {
-        // ignore for now
-      }
+    // Calculate Recommendation Mix (Pie)
+    if (items.length === 0) {
+      setPieData([{ name: 'No Data', value: 1 }])
+    } else {
+      setPieData([
+        { name: 'Invest', value: invested },
+        { name: 'Pass', value: passed }
+      ])
     }
 
-    load()
-  }, [])
+    // Calculate Sector Distribution (Bar)
+    const sCounts = {}
+    items.forEach(r => {
+      const sector = r.analysis?.industry?.split('/')[0]?.trim() || 'Other'
+      sCounts[sector] = (sCounts[sector] || 0) + 1
+    })
+    setSectorData(Object.keys(sCounts).map(s => ({ sector: s, count: sCounts[s] })))
+
+    // Calculate Confidence Trend (Line - 6 Months)
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const tMap = {}
+    items.forEach(r => {
+      const m = monthNames[new Date(r.createdAt).getMonth()]
+      if (!tMap[m]) tMap[m] = { sum: 0, count: 0 }
+      tMap[m].sum += r.confidence || 0
+      tMap[m].count += 1
+    })
+    
+    const tData = []
+    const currMonth = new Date().getMonth()
+    for (let i = 5; i >= 0; i--) {
+      let mIndex = currMonth - i
+      if (mIndex < 0) mIndex += 12
+      const mName = monthNames[mIndex]
+      tData.push({
+        month: mName,
+        score: tMap[mName] ? Math.round(tMap[mName].sum / tMap[mName].count) : 0
+      })
+    }
+    setTrendData(tData)
+  }, [reports])
 
   return (
     <div className="space-y-6">
@@ -158,11 +148,11 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {reports.length > 0 ? reports.slice(0, 5).map((item) => (
-                  <tr key={item._id} className="border-t border-white/10 bg-slate-950/40">
-                    <td className="px-4 py-3">{item.companyName}</td>
+                  <tr key={item.id} className="border-t border-white/10 bg-slate-950/40">
+                    <td className="px-4 py-3">{item.company}</td>
                     <td className="px-4 py-3">{new Date(item.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3">{item.recommendation}</td>
-                    <td className="px-4 py-3">{item.confidenceScore}%</td>
+                    <td className="px-4 py-3">{item.confidence}%</td>
                   </tr>
                 )) : <tr><td colSpan="4" className="px-4 py-6 text-center text-slate-400">No reports yet — run your first research workflow.</td></tr>}
               </tbody>
