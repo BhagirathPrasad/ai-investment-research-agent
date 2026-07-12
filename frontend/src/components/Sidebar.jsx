@@ -56,10 +56,6 @@ export default function Sidebar() {
         )}
       </nav>
 
-      <div className="mt-10 rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/15 to-indigo-500/15 p-4">
-        <p className="text-sm text-slate-300">Next milestone</p>
-        <p className="mt-2 text-lg font-semibold text-white">Deploy to Vercel + Render</p>
-      </div>
     </aside>
   )
 }
