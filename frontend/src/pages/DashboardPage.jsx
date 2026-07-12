@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { BarChart, Bar, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { BarChart, Bar, CartesianGrid, Cell, Area, AreaChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { FiActivity, FiTrendingUp, FiUsers, FiZap } from 'react-icons/fi'
 import { useAppContext } from '../context/AppContext'
 
@@ -88,7 +88,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-white">Recommendation Mix</h3>
@@ -102,8 +102,8 @@ export default function DashboardPage() {
                     <Cell fill="#334155" />
                   ) : (
                     <>
-                      <Cell fill="#22d3ee" />
-                      <Cell fill="#f43f5e" />
+                      <Cell fill="#22d3ee" stroke="rgba(255,255,255,0.05)" strokeWidth={2} />
+                      <Cell fill="#6366f1" stroke="rgba(255,255,255,0.05)" strokeWidth={2} />
                     </>
                   )}
                 </Pie>
@@ -120,19 +120,28 @@ export default function DashboardPage() {
           </div>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData}>
-                <CartesianGrid stroke="#334155" strokeDasharray="4 4" />
-                <XAxis dataKey="month" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
-                <Tooltip />
-                <Line type="monotone" dataKey="score" stroke="#22d3ee" strokeWidth={3} />
-              </LineChart>
+              <AreaChart data={trendData}>
+                <defs>
+                  <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#334155" strokeDasharray="4 4" vertical={false} />
+                <XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
+                <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }}
+                  itemStyle={{ color: '#22d3ee' }}
+                />
+                <Area type="monotone" dataKey="score" stroke="#22d3ee" strokeWidth={3} fillOpacity={1} fill="url(#areaGradient)" />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
           <h3 className="text-lg font-semibold text-white">Recent Activity</h3>
           <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
@@ -147,11 +156,22 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {reports.length > 0 ? reports.slice(0, 5).map((item) => (
-                  <tr key={item.id} className="border-t border-white/10 bg-slate-950/40">
-                    <td className="px-4 py-3">{item.company}</td>
-                    <td className="px-4 py-3">{new Date(item.createdAt).toLocaleDateString()}</td>
-                    <td className="px-4 py-3">{item.recommendation}</td>
-                    <td className="px-4 py-3">{item.confidence}%</td>
+                  <tr key={item.id} className="border-t border-white/5 bg-slate-950/40 hover:bg-slate-800/40 transition-colors">
+                    <td className="px-4 py-3 font-medium text-slate-200">{item.company}</td>
+                    <td className="px-4 py-3 text-slate-400">{new Date(item.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-bold tracking-wide ${item.recommendation === 'INVEST' ? 'text-emerald-400' : 'text-indigo-400'}`}>
+                        {item.recommendation}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="flex items-center gap-1.5">
+                        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-800">
+                          <div className="h-full bg-cyan-400" style={{ width: `${item.confidence}%` }} />
+                        </div>
+                        <span className="text-xs text-slate-400">{item.confidence}%</span>
+                      </span>
+                    </td>
                   </tr>
                 )) : <tr><td colSpan="4" className="px-4 py-6 text-center text-slate-400">No reports yet — run your first research workflow.</td></tr>}
               </tbody>
@@ -183,7 +203,7 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
