@@ -1,5 +1,6 @@
 import dotenv from 'dotenv'
-import yahooFinance from 'yahoo-finance2'
+import yahooFinanceDefault from 'yahoo-finance2'
+const yahooFinance = new yahooFinanceDefault()
 
 dotenv.config()
 
