@@ -164,11 +164,21 @@ export default function DashboardPage() {
           <div className="mt-4 h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={sectorData}>
-                <CartesianGrid stroke="#334155" strokeDasharray="4 4" />
-                <XAxis dataKey="sector" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
-                <Tooltip />
-                <Bar dataKey="count" radius={[8, 8, 0, 0]} fill="#38bdf8" />
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#22d3ee" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={1} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#334155" strokeDasharray="4 4" vertical={false} />
+                <XAxis dataKey="sector" stroke="#94a3b8" tickLine={false} axisLine={false} />
+                <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }}
+                  itemStyle={{ color: '#22d3ee' }}
+                />
+                <Bar dataKey="count" radius={[6, 6, 0, 0]} fill="url(#barGradient)" maxBarSize={60} />
               </BarChart>
             </ResponsiveContainer>
           </div>
