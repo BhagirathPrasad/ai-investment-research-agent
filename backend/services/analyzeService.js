@@ -25,18 +25,26 @@ export async function analyzeCompanyService(companyName) {
     yahooFinance.quoteSummary(symbol, { modules: ['assetProfile', 'financialData', 'defaultKeyStatistics'] }).catch(() => ({}))
   ])
 
-  const currentPrice = quoteData.regularMarketPrice || 0
-  const openPrice = quoteData.regularMarketOpen || currentPrice
-  const changeAmount = quoteData.regularMarketChange || 0
+  let originalCurrency = quoteData.currency || 'USD'
+  let conversionRate = 1
+  if (originalCurrency !== 'INR') {
+    try {
+      const fx = await yahooFinance.quote(`${originalCurrency}INR=X`)
+      if (fx && fx.regularMarketPrice) {
+        conversionRate = fx.regularMarketPrice
+      }
+    } catch (err) {
+      console.error('Failed to fetch FX rate', err)
+    }
+  }
+
+  const currentPrice = (quoteData.regularMarketPrice || 0) * conversionRate
+  const openPrice = (quoteData.regularMarketOpen || quoteData.regularMarketPrice || 0) * conversionRate
+  const changeAmount = (quoteData.regularMarketChange || 0) * conversionRate
   const changePercent = quoteData.regularMarketChangePercent || 0
   const isUp = changeAmount >= 0
 
-  const currency = quoteData.currency || 'USD'
-  const getSymbol = (curr) => {
-    const map = { USD: '$', EUR: '€', GBP: '£', INR: '₹', JPY: '¥', CAD: 'C$', AUD: 'A$' }
-    return map[curr] || curr + ' '
-  }
-  const sym = getSymbol(currency)
+  const sym = '₹'
 
   // 3. Generate a smooth intraday chart connecting the real open price to the real current price
   const chartData = []
@@ -99,17 +107,17 @@ export async function analyzeCompanyService(companyName) {
       changePercent: changePercent.toFixed(2),
       isUp,
       open: openPrice.toFixed(2),
-      high: (quoteData.regularMarketDayHigh || currentPrice).toFixed(2),
-      low: (quoteData.regularMarketDayLow || currentPrice).toFixed(2),
+      high: ((quoteData.regularMarketDayHigh || quoteData.regularMarketPrice || 0) * conversionRate).toFixed(2),
+      low: ((quoteData.regularMarketDayLow || quoteData.regularMarketPrice || 0) * conversionRate).toFixed(2),
       volume: formatLargeNumber(quoteData.regularMarketVolume),
-      week52High: (quoteData.fiftyTwoWeekHigh || currentPrice).toFixed(2),
+      week52High: ((quoteData.fiftyTwoWeekHigh || quoteData.regularMarketPrice || 0) * conversionRate).toFixed(2),
       chartData
     },
 
     analysis: {
       overview,
       industry: `${sector} / ${industry}`,
-      marketCap: formatLargeNumber(quoteData.marketCap),
+      marketCap: formatLargeNumber(quoteData.marketCap * conversionRate),
       ceo: profile.companyOfficers && profile.companyOfficers.length > 0 ? profile.companyOfficers[0].name : 'Leadership Team',
       
       business: {
@@ -122,10 +130,10 @@ export async function analyzeCompanyService(companyName) {
       financials: {
         revenueGrowth: formatPercent(financials.revenueGrowth),
         profitMargins: formatPercent(netMargin),
-        cash: formatLargeNumber(financials.totalCash),
-        debt: formatLargeNumber(financials.totalDebt),
+        cash: formatLargeNumber(financials.totalCash * conversionRate),
+        debt: formatLargeNumber(financials.totalDebt * conversionRate),
         equity: 'N/A', 
-        freeCashFlow: formatLargeNumber(financials.operatingCashflow),
+        freeCashFlow: formatLargeNumber(financials.operatingCashflow * conversionRate),
       },
 
       ratios: {
