@@ -88,6 +88,9 @@ export async function analyzeCompanyService(companyName) {
     ? profile.longBusinessSummary.substring(0, 400) + '...'
     : `${actualCompanyName} operates in the ${industry} industry within the ${sector} sector.`
 
+  const roe = financials.returnOnEquity || 0
+  const netMargin = financials.profitMargins || 0
+
   const roePass = roe > 0.15
   const netMarginPass = netMargin > 0.10
   const isGood = roePass && netMarginPass
