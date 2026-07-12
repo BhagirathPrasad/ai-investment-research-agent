@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { BarChart, Bar, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { FiActivity, FiTrendingUp, FiUsers, FiZap } from 'react-icons/fi'
-import { FiActivity, FiTrendingUp, FiUsers, FiZap } from 'react-icons/fi'
 import { useAppContext } from '../context/AppContext'
 
 export default function DashboardPage() {
