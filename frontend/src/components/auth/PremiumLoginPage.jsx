@@ -97,12 +97,12 @@ export default function PremiumLoginPage() {
       {/* Main Container */}
       <div className="relative z-10 w-full min-h-screen flex items-center justify-center px-4 py-8">
         <motion.div
-          className="w-full max-w-5xl"
+          className="w-full max-w-5xl py-8 lg:py-12"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:rounded-3xl overflow-hidden lg:h-screen">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:rounded-3xl overflow-hidden lg:min-h-[80vh] shadow-2xl">
             {/* LEFT PANEL - AI Branding Section (55%) - Hidden on Mobile/Tablet */}
             <motion.div
               className="hidden lg:flex lg:col-span-7 flex-col justify-between p-12 relative bg-linear-to-br from-blue-600/10 via-purple-600/5 to-slate-900/20 backdrop-blur-3xl border border-white/10"

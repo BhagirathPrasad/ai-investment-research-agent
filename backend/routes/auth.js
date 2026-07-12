@@ -31,7 +31,11 @@ router.post(
     const user = await User.create({ fullName, username, email, phone, password, profileImage })
     const token = createToken(user)
 
-    res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' })
+    res.cookie('token', token, { 
+      httpOnly: true, 
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+      secure: process.env.NODE_ENV === 'production' 
+    })
     res.status(201).json({ user: { id: user._id, fullName: user.fullName, username: user.username, email: user.email, phone: user.phone, profileImage: user.profileImage, role: user.role }, token })
   },
 )
@@ -52,7 +56,11 @@ router.post(
     }
 
     const token = createToken(user)
-    res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' })
+    res.cookie('token', token, { 
+      httpOnly: true, 
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+      secure: process.env.NODE_ENV === 'production' 
+    })
     res.json({ user: { id: user._id, fullName: user.fullName, username: user.username, email: user.email, phone: user.phone, profileImage: user.profileImage, role: user.role }, token })
   },
 )
