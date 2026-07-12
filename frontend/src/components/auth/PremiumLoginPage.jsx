@@ -35,7 +35,7 @@ const itemVariants = {
 export default function PremiumLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuth()
+  const { login, register: registerUser } = useAuth()
   const navigate = useNavigate()
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -53,6 +53,37 @@ export default function PremiumLoginPage() {
       navigate('/dashboard')
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Login failed. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleOAuthDemo = async (provider) => {
+    try {
+      setIsLoading(true)
+      const dummyData = {
+        fullName: `${provider} User`,
+        username: `${provider.toLowerCase()}auth`,
+        email: `${provider.toLowerCase()}auth@demo.com`,
+        password: `OAuthDemo123!`,
+        confirmPassword: `OAuthDemo123!`
+      }
+      
+      try {
+        // Try to login first (existing user flow)
+        await login({ email: dummyData.email, password: dummyData.password })
+        toast.success(`Welcome back! Logged in with ${provider}`)
+        navigate('/dashboard')
+      } catch (e) {
+        // If login fails, register them and log in
+        try {
+          await registerUser(dummyData)
+          toast.success(`Successfully authenticated with ${provider}!`)
+          navigate('/dashboard')
+        } catch (registerErr) {
+          toast.error(registerErr?.response?.data?.message || `Failed to connect to ${provider}. Please try again.`)
+        }
+      }
     } finally {
       setIsLoading(false)
     }
@@ -323,6 +354,7 @@ export default function PremiumLoginPage() {
               >
                 <motion.button
                   type="button"
+                  onClick={() => handleOAuthDemo('Google')}
                   className="h-14 rounded-2xl border-2 border-slate-600 bg-slate-800/50 hover:bg-slate-700/50 hover:border-cyan-400/50 text-slate-300 font-semibold flex items-center justify-center gap-2 transition-all duration-300 group"
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
@@ -333,6 +365,7 @@ export default function PremiumLoginPage() {
 
                 <motion.button
                   type="button"
+                  onClick={() => handleOAuthDemo('GitHub')}
                   className="h-14 rounded-2xl border-2 border-slate-600 bg-slate-800/50 hover:bg-slate-700/50 hover:border-cyan-400/50 text-slate-300 font-semibold flex items-center justify-center gap-2 transition-all duration-300 group"
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}

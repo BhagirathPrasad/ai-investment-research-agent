@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { FiEye, FiEyeOff, FiImage, FiLoader, FiMail, FiLock, FiUser } from 'react-icons/fi'
+import { SiGoogle, SiGithub } from 'react-icons/si'
 import { toast } from 'react-hot-toast'
 import AuthLayout from '../../components/auth/AuthLayout'
 import { useAuth } from '../../context/AuthContext'
@@ -12,7 +13,7 @@ export default function SignupPage() {
   const [previewUrl, setPreviewUrl] = useState('')
   const { register: registerUser } = useAuth()
   const navigate = useNavigate()
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm()
+  const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm()
 
   const password = watch('password', '')
 
@@ -45,9 +46,49 @@ export default function SignupPage() {
     reader.readAsDataURL(file)
   }
 
+  const handleOAuthDemo = async (provider) => {
+    // Simulate fetching user info from OAuth provider
+    const dummyEmail = `new_${provider.toLowerCase()}@demo.com`
+    const dummyName = `${provider} User`
+    
+    // Auto-fill the form fields
+    setValue('email', dummyEmail, { shouldValidate: true })
+    setValue('fullName', dummyName, { shouldValidate: true })
+    
+    toast.success(`Connected to ${provider}! Please complete your registration.`, { icon: '👋' })
+  }
+
   return (
     <AuthLayout title="Create your account" subtitle="Join the AI investment workspace with a secure, premium onboarding flow.">
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+      {/* Social Signup Buttons */}
+      <div className="mt-8 grid grid-cols-2 gap-4">
+        <button
+          type="button"
+          onClick={() => handleOAuthDemo('Google')}
+          className="h-12 rounded-xl border-2 border-slate-600 bg-slate-800/50 hover:bg-slate-700/50 hover:border-cyan-400/50 text-slate-300 font-semibold flex items-center justify-center gap-2 transition-all duration-300 group"
+        >
+          <SiGoogle size={18} className="group-hover:text-cyan-400 transition-colors" />
+          <span className="hidden sm:inline">Google</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleOAuthDemo('GitHub')}
+          className="h-12 rounded-xl border-2 border-slate-600 bg-slate-800/50 hover:bg-slate-700/50 hover:border-cyan-400/50 text-slate-300 font-semibold flex items-center justify-center gap-2 transition-all duration-300 group"
+        >
+          <SiGithub size={18} className="group-hover:text-cyan-400 transition-colors" />
+          <span className="hidden sm:inline">GitHub</span>
+        </button>
+      </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-4 my-8">
+        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
+        <span className="text-xs text-slate-400 font-semibold whitespace-nowrap">OR CONTINUE WITH EMAIL</span>
+        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
+      </div>
+
+      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         {/* Personal Information Section */}
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Personal Information</h3>
