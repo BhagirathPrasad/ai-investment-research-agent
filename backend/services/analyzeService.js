@@ -88,12 +88,74 @@ export async function analyzeCompanyService(companyName) {
     ? profile.longBusinessSummary.substring(0, 400) + '...'
     : `${actualCompanyName} operates in the ${industry} industry within the ${sector} sector.`
 
-  const roe = financials.returnOnEquity || 0
-  const netMargin = financials.profitMargins || 0
-  
-  // 5. Evaluate based on real data
-  const isGood = roe > 0.15 && netMargin > 0.10
+  const roePass = roe > 0.15
+  const netMarginPass = netMargin > 0.10
+  const isGood = roePass && netMarginPass
   const confidence = isGood ? (75 + Math.floor(Math.random() * 20)) : (40 + Math.floor(Math.random() * 30))
+
+  // 6. Generate AI Analysis using OpenRouter
+  let aiAnalysis = null;
+  if (process.env.OPENROUTER_API_KEY) {
+    try {
+      const companyDataStr = `
+        Company: ${actualCompanyName}
+        Industry: ${industry}
+        Sector: ${sector}
+        Overview: ${overview}
+        Current Price: ${currentPrice}
+        ROE: ${(roe * 100).toFixed(2)}%
+        Net Margin: ${(netMargin * 100).toFixed(2)}%
+        Market Cap: ${quoteData.marketCap}
+      `;
+
+      const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'openai/gpt-3.5-turbo',
+          response_format: { type: "json_object" },
+          messages: [
+            { 
+              role: 'system', 
+              content: 'You are an expert financial analyst. Based on the company data provided, generate a JSON object containing EXACTLY these keys (all strings): "products" (brief description of what they sell), "moat" (their competitive advantage), "trend" (market trend), "management" (management quality), "concentration" (revenue concentration risk), "competition" (competitor risk), "disruption" (disruption risk), "summary" (1-2 sentences concluding if it looks like a good buy based on the metrics), "reasoning" (brief reasoning).'
+            },
+            {
+              role: 'user',
+              content: companyDataStr
+            }
+          ]
+        })
+      });
+      
+      const aiData = await aiResponse.json();
+      if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
+        const parsed = JSON.parse(aiData.choices[0].message.content);
+        if (parsed.products) aiAnalysis = parsed;
+      }
+    } catch (err) {
+      console.error("AI Generation failed:", err.message);
+    }
+  }
+
+  // Fallback data if AI fails
+  const fallback = {
+    products: 'Based on SEC filings and public disclosures.',
+    moat: 'Evaluated based on market position and financial resilience.',
+    trend: 'Subject to macro-economic and sector-specific cycles.',
+    management: 'Evaluated based on capital allocation and operational efficiency.',
+    concentration: 'Depends on customer base diversification.',
+    competition: 'Subject to industry rivalries and new entrants.',
+    disruption: 'Technology and regulatory changes pose ongoing risks.',
+    summary: isGood 
+      ? `${actualCompanyName} shows strong financial health with high ROE and solid profit margins, making it an attractive investment candidate.` 
+      : `${actualCompanyName} currently exhibits weaker financial metrics (e.g., lower ROE or margins) which warrants caution.`,
+    reasoning: 'Synthesized using real-time financial data from Yahoo Finance, evaluating profitability ratios, balance sheet health, and market valuation.',
+  }
+
+  const finalAi = aiAnalysis || fallback;
 
   return {
     company: actualCompanyName,
@@ -121,10 +183,10 @@ export async function analyzeCompanyService(companyName) {
       ceo: profile.companyOfficers && profile.companyOfficers.length > 0 ? profile.companyOfficers[0].name : 'Leadership Team',
       
       business: {
-        products: 'Based on SEC filings and public disclosures.',
-        moat: 'Evaluated based on market position and financial resilience.',
-        trend: 'Subject to macro-economic and sector-specific cycles.',
-        management: 'Evaluated based on capital allocation and operational efficiency.',
+        products: finalAi.products,
+        moat: finalAi.moat,
+        trend: finalAi.trend,
+        management: finalAi.management,
       },
 
       financials: {
@@ -138,15 +200,15 @@ export async function analyzeCompanyService(companyName) {
 
       ratios: {
         roe: formatPercent(roe),
-        roePass: roe > 0.15,
+        roePass,
         netMargin: formatPercent(netMargin),
-        netMarginPass: netMargin > 0.10,
+        netMarginPass,
       },
 
       risks: {
-        concentration: 'Depends on customer base diversification.',
-        competition: 'Subject to industry rivalries and new entrants.',
-        disruption: 'Technology and regulatory changes pose ongoing risks.',
+        concentration: finalAi.concentration,
+        competition: finalAi.competition,
+        disruption: finalAi.disruption,
       },
 
       valuation: {
@@ -154,10 +216,8 @@ export async function analyzeCompanyService(companyName) {
         pfcfRatio: 'N/A', 
       },
 
-      summary: isGood 
-        ? `${actualCompanyName} shows strong financial health with high ROE and solid profit margins, making it an attractive investment candidate.` 
-        : `${actualCompanyName} currently exhibits weaker financial metrics (e.g., lower ROE or margins) which warrants caution.`,
-      reasoning: 'Synthesized using real-time financial data from Yahoo Finance, evaluating profitability ratios, balance sheet health, and market valuation.',
+      summary: finalAi.summary,
+      reasoning: finalAi.reasoning,
     }
   }
 }
