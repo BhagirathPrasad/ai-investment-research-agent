@@ -13,7 +13,7 @@ export default function SettingsPage() {
   })
   const [isSaving, setIsSaving] = useState(false)
 
-  // Load keys from localStorage on mount
+  // Load keys and theme from localStorage on mount
   useEffect(() => {
     const savedKeys = localStorage.getItem('ai_invest_api_keys')
     if (savedKeys) {
@@ -22,6 +22,16 @@ export default function SettingsPage() {
       } catch (e) {
         console.error('Failed to parse API keys')
       }
+    }
+    
+    // Theme init
+    const savedTheme = localStorage.getItem('ai_invest_theme')
+    if (savedTheme === 'light') {
+      setTheme('light')
+      document.documentElement.classList.remove('dark')
+    } else {
+      setTheme('dark')
+      document.documentElement.classList.add('dark')
     }
   }, [])
 
@@ -45,9 +55,17 @@ export default function SettingsPage() {
   }
 
   const toggleTheme = () => {
-    if (theme === 'dark') {
-      toast('Light mode is temporarily disabled to preserve the premium aesthetic.', { icon: '🌙', style: { borderRadius: '10px', background: '#1e293b', color: '#fff' } })
+    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(newTheme)
+    
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
     }
+    
+    localStorage.setItem('ai_invest_theme', newTheme)
+    toast.success(`${newTheme === 'dark' ? 'Dark' : 'Light'} mode activated!`)
   }
 
   return (
@@ -77,16 +95,16 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 {theme === 'dark' ? <FiMoon className="text-indigo-400" size={20} /> : <FiSun className="text-amber-400" size={20} />}
                 <div>
-                  <p className="text-white font-medium">Dark Mode Active</p>
-                  <p className="text-xs text-slate-400">Recommended for eye comfort</p>
+                  <p className="text-white font-medium">{theme === 'dark' ? 'Dark Mode Active' : 'Light Mode Active'}</p>
+                  <p className="text-xs text-slate-400">{theme === 'dark' ? 'Recommended for eye comfort' : 'High contrast mode'}</p>
                 </div>
               </div>
               
               <button 
                 onClick={toggleTheme}
-                className="relative inline-flex h-7 w-12 items-center rounded-full bg-cyan-500 transition-colors"
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${theme === 'dark' ? 'bg-cyan-500' : 'bg-slate-500'}`}
               >
-                <span className="translate-x-6 inline-block h-5 w-5 transform rounded-full bg-white transition-transform" />
+                <span className={`${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'} inline-block h-5 w-5 transform rounded-full bg-white transition-transform`} />
               </button>
             </div>
           </div>
