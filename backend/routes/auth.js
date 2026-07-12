@@ -15,7 +15,7 @@ router.post(
   [
     body('fullName').notEmpty().withMessage('Full name is required'),
     body('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
-    body('email').isEmail().withMessage('Valid email is required'),
+    body('email').trim().isEmail().withMessage('Valid email is required'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
     body('confirmPassword').custom((value, { req }) => value === req.body.password).withMessage('Passwords do not match'),
   ],
@@ -39,7 +39,7 @@ router.post(
 router.post(
   '/login',
   [
-    body('email').isEmail().withMessage('Valid email is required'),
+    body('email').trim().isEmail().withMessage('Valid email is required'),
     body('password').notEmpty().withMessage('Password is required'),
   ],
   handleValidationErrors,

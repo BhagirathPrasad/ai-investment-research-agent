@@ -10,6 +10,7 @@ import analyzeRouter from './routes/analyze.js'
 import authRouter from './routes/auth.js'
 import userRouter from './routes/user.js'
 import reportRouter from './routes/report.js'
+import adminRouter from './routes/admin.js'
 
 dotenv.config()
 
@@ -30,6 +31,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
 app.use('/api/report', reportRouter)
+app.use('/api/admin', adminRouter)
 app.use('/api', analyzeRouter)
 
 app.use((err, _req, res, _next) => {

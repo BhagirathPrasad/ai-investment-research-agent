@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { BarChart, Bar, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { FiActivity, FiTrendingUp, FiUsers, FiZap } from 'react-icons/fi'
 import { authApi } from '../services/authApi'
+import { useAuth } from '../context/AuthContext'
 
 const pieData = [
   { name: 'Invest', value: 74 },
@@ -25,6 +26,7 @@ const sectorData = [
 ]
 
 export default function DashboardPage() {
+  const { user } = useAuth()
   const [reports, setReports] = useState([])
   const [stats, setStats] = useState({ totalReports: 0, invested: 0, passed: 0, confidence: 0 })
 

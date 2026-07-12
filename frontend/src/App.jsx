@@ -4,6 +4,7 @@ import { AppProvider } from './context/AppContext'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import MainLayout from './layouts/MainLayout'
+import AdminLayout from './layouts/AdminLayout'
 import LandingPage from './pages/LandingPage'
 import DashboardPage from './pages/DashboardPage'
 import ResearchPage from './pages/ResearchPage'
@@ -16,6 +17,7 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 import ProfilePage from './pages/ProfilePage'
 import ReportsPage from './pages/ReportsPage'
+import AdminPage from './pages/AdminPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
@@ -39,6 +41,10 @@ function App() {
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />
+              </Route>
+
+              <Route element={<AdminLayout />}>
+                <Route path="admin" element={<AdminPage />} />
               </Route>
             </Route>
 
