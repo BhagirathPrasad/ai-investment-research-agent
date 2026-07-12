@@ -15,6 +15,21 @@
 
 html {
   scroll-behavior: smooth;
+  transition: filter 0.3s ease, background-color 0.3s ease;
+}
+
+/* Light mode using CSS inversion */
+html:not(.dark) {
+  filter: invert(1) hue-rotate(180deg);
+  background-color: #fdf9e8; /* inverted #020617 */
+}
+
+/* Re-invert images, svgs, and charts so they look normal */
+html:not(.dark) img,
+html:not(.dark) video,
+html:not(.dark) .recharts-responsive-container,
+html:not(.dark) [data-recharts-surface] {
+  filter: invert(1) hue-rotate(180deg);
 }
 
 body {

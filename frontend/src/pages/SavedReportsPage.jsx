@@ -1,8 +1,15 @@
 import { useAppContext } from '../context/AppContext'
 import { FiDownload, FiEye, FiTrash2 } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
 
 export default function SavedReportsPage() {
-  const { reports, deleteReport } = useAppContext()
+  const { reports, deleteReport, setCurrentReport } = useAppContext()
+  const navigate = useNavigate()
+
+  const handleViewReport = (report) => {
+    setCurrentReport(report)
+    navigate('/report')
+  }
 
   return (
     <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-black/20 backdrop-blur-xl">
@@ -25,7 +32,7 @@ export default function SavedReportsPage() {
               <span className={`rounded-full px-3 py-1 text-sm ${report.recommendation === 'INVEST' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300'}`}>
                 {report.recommendation}
               </span>
-              <button className="rounded-2xl border border-white/10 bg-white/5 p-2 text-slate-200">
+              <button onClick={() => handleViewReport(report)} className="rounded-2xl border border-white/10 bg-white/5 p-2 text-slate-200 hover:bg-white/10 transition">
                 <FiEye />
               </button>
               <button className="rounded-2xl border border-white/10 bg-white/5 p-2 text-slate-200">
