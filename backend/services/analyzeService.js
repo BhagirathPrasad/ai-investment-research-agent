@@ -31,6 +31,13 @@ export async function analyzeCompanyService(companyName) {
   const changePercent = quoteData.regularMarketChangePercent || 0
   const isUp = changeAmount >= 0
 
+  const currency = quoteData.currency || 'USD'
+  const getSymbol = (curr) => {
+    const map = { USD: '$', EUR: '€', GBP: '£', INR: '₹', JPY: '¥', CAD: 'C$', AUD: 'A$' }
+    return map[curr] || curr + ' '
+  }
+  const sym = getSymbol(currency)
+
   // 3. Generate a smooth intraday chart connecting the real open price to the real current price
   const chartData = []
   let currentSimPrice = openPrice
@@ -55,10 +62,10 @@ export async function analyzeCompanyService(companyName) {
   
   const formatLargeNumber = (num) => {
     if (!num) return 'N/A'
-    if (num >= 1e12) return `$${(num / 1e12).toFixed(2)}T`
-    if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`
-    if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`
-    return `$${num.toLocaleString()}`
+    if (num >= 1e12) return `${sym}${(num / 1e12).toFixed(2)}T`
+    if (num >= 1e9) return `${sym}${(num / 1e9).toFixed(2)}B`
+    if (num >= 1e6) return `${sym}${(num / 1e6).toFixed(2)}M`
+    return `${sym}${num.toLocaleString()}`
   }
 
   const formatPercent = (num) => {
@@ -86,6 +93,7 @@ export async function analyzeCompanyService(companyName) {
     confidence,
     
     stockData: {
+      currencySymbol: sym,
       currentPrice: currentPrice.toFixed(2),
       changeAmount: changeAmount.toFixed(2),
       changePercent: changePercent.toFixed(2),

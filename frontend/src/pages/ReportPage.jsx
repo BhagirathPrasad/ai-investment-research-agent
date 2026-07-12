@@ -70,11 +70,11 @@ export default function ReportPage() {
       <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-black/20 backdrop-blur-xl">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-white">${stockData.currentPrice}</h1>
+            <h1 className="text-4xl font-bold text-white">{stockData.currencySymbol || '$'}{stockData.currentPrice}</h1>
             <p className={`mt-2 flex items-center text-lg font-medium ${stockData.isUp ? 'text-emerald-400' : 'text-rose-400'}`}>
               {stockData.isUp ? <FiArrowUp className="mr-1" /> : <FiArrowDown className="mr-1" />}
               {stockData.isUp ? '+' : ''}{stockData.changePercent}% 
-              ({stockData.isUp ? '+' : '-'}${Math.abs(stockData.changeAmount).toFixed(2)}) Today
+              ({stockData.isUp ? '+' : '-'}{stockData.currencySymbol || '$'}{Math.abs(stockData.changeAmount).toFixed(2)}) Today
             </p>
           </div>
           <div className="text-sm text-slate-400">
@@ -112,15 +112,15 @@ export default function ReportPage() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-6 pt-6 border-t border-white/10">
           <div>
             <p className="text-sm text-slate-400">Open</p>
-            <p className="mt-1 font-semibold text-white">${stockData.open}</p>
+            <p className="mt-1 font-semibold text-white">{stockData.currencySymbol || '$'}{stockData.open}</p>
           </div>
           <div>
             <p className="text-sm text-slate-400">High</p>
-            <p className="mt-1 font-semibold text-white">${stockData.high}</p>
+            <p className="mt-1 font-semibold text-white">{stockData.currencySymbol || '$'}{stockData.high}</p>
           </div>
           <div>
             <p className="text-sm text-slate-400">Low</p>
-            <p className="mt-1 font-semibold text-white">${stockData.low}</p>
+            <p className="mt-1 font-semibold text-white">{stockData.currencySymbol || '$'}{stockData.low}</p>
           </div>
           <div>
             <p className="text-sm text-slate-400">Vol</p>
@@ -128,7 +128,7 @@ export default function ReportPage() {
           </div>
           <div>
             <p className="text-sm text-slate-400">52-wk High</p>
-            <p className="mt-1 font-semibold text-white">${stockData.week52High}</p>
+            <p className="mt-1 font-semibold text-white">{stockData.currencySymbol || '$'}{stockData.week52High}</p>
           </div>
         </div>
       </div>
