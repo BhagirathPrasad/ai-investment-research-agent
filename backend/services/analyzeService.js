@@ -20,9 +20,10 @@ export async function analyzeCompanyService(companyName) {
   const actualCompanyName = quote.shortname || quote.longname || companyName
 
   // 2. Fetch real financial data and company profile
-  const [quoteData, summary] = await Promise.all([
-    yahooFinance.quote(symbol),
-    yahooFinance.quoteSummary(symbol, { modules: ['assetProfile', 'financialData', 'defaultKeyStatistics'] }).catch(() => ({}))
+  const [quoteData, summary, newsData] = await Promise.all([
+    yahooFinance.quote(symbol).catch(() => ({})),
+    yahooFinance.quoteSummary(symbol, { modules: ['assetProfile', 'financialData', 'defaultKeyStatistics'] }).catch(() => ({})),
+    yahooFinance.search(symbol).catch(() => ({ news: [] }))
   ])
 
   let originalCurrency = quoteData.currency || 'USD'
@@ -221,6 +222,13 @@ export async function analyzeCompanyService(companyName) {
 
       summary: finalAi.summary,
       reasoning: finalAi.reasoning,
-    }
+    },
+    
+    news: (newsData.news || []).slice(0, 4).map(item => ({
+      title: item.title,
+      publisher: item.publisher,
+      link: item.link,
+      time: item.providerPublishTime,
+    }))
   }
 }

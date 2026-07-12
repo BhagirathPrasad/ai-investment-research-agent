@@ -79,3 +79,49 @@ input {
     @apply h-14 rounded-2xl border-2 transition-all duration-300 backdrop-blur-sm flex items-center px-4 border-slate-600 bg-slate-800/50 hover:border-cyan-400/30 focus-within:border-cyan-400/80 focus-within:bg-slate-800/80;
   }
 }
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: white !important;
+  }
+  
+  /* Hide unnecessary UI elements during PDF export */
+  aside, 
+  nav, 
+  header,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Adjust main container to take full width */
+  main,
+  .flex-1 {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Make dark backgrounds transparent and text dark for better PDF readability */
+  .bg-slate-900\/70,
+  .bg-slate-950\/50,
+  .bg-slate-950,
+  .glass-dark {
+    background-color: transparent !important;
+    border: 1px solid #e2e8f0 !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+
+  .text-white,
+  .text-slate-300,
+  .text-slate-400,
+  .text-cyan-400 {
+    color: #0f172a !important;
+  }
+
+  .border-white\/10 {
+    border-color: #cbd5e1 !important;
+  }
+}

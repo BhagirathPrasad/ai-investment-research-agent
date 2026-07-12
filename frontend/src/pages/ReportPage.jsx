@@ -61,7 +61,7 @@ export default function ReportPage() {
           <h2 className="text-3xl font-bold text-white uppercase">{currentReport.company}</h2>
           <p className="mt-2 text-slate-400 max-w-2xl">{analysis.overview || 'AI-generated research summary.'}</p>
         </div>
-        <button className="flex items-center gap-2 rounded-full bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300 transition">
+        <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 rounded-full bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300 transition">
           <FiDownload /> Export PDF
         </button>
       </div>
@@ -304,6 +304,33 @@ export default function ReportPage() {
         </div>
       </div>
 
+      {/* Recent News Section */}
+      {currentReport.news && currentReport.news.length > 0 && (
+        <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-black/20 backdrop-blur-xl">
+          <h3 className="mb-6 text-xl font-bold text-white">Recent News</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {currentReport.news.map((item, index) => (
+              <a 
+                key={index} 
+                href={item.link} 
+                target="_blank" 
+                rel="noreferrer"
+                className="block p-4 rounded-xl border border-white/5 bg-slate-950/50 hover:bg-slate-800/50 hover:border-cyan-500/30 transition group"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-semibold text-cyan-400">{item.publisher}</span>
+                  <span className="text-xs text-slate-500">
+                    {new Date(item.time).toLocaleDateString()}
+                  </span>
+                </div>
+                <h4 className="text-sm font-medium text-slate-200 group-hover:text-white line-clamp-2">
+                  {item.title}
+                </h4>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </motion.div>
   )
 }
