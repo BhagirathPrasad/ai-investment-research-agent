@@ -139,7 +139,7 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
